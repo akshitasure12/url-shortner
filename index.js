@@ -3,7 +3,7 @@ const path = require("path");
 const {connectToDB} = require("./connection.js");
 const Url = require("./models/url.js");
 const cookieParser = require("cookie-parser");
-const {restrictToLoggedInUser, checkAuth} = require("./middlewares/auth.js");
+const {checkForAuth, restrictTo} = require("./middlewares/auth.js");
 const app = express()
 
 const PORT = 8000
@@ -22,9 +22,10 @@ app.set("views", path.resolve("./views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(checkForAuth);
 
-app.use("/url", restrictToLoggedInUser, urlRouter);
-app.use("/", checkAuth, staticRouter);
+app.use("/url", restrictTo(["NORMAL", "ADMIN"]), urlRouter);
+app.use("/", staticRouter);
 app.use("/user", userRouter);
 
 app.listen(PORT, () => console.log("port successfully running"));
